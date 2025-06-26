@@ -1563,11 +1563,11 @@ void CppGenerator::WriteFileHead(StreamType& File, PackageInfoHandle Package, EF
 	if (Type == EFileType::BasicHpp)
 	{
 		File << "#include \"../PropertyFixup.hpp\"\n";
-		File << "#include \"../UnrealContainers.hpp\"\n";
+		File << "#include \"../../UnrealContainers.hpp\"\n";
 
 		if constexpr (Settings::Debug::bGenerateAssertionFile)
 		{
-			File << "#include \"../Assertions.inl\"\n";
+			File << "#include \"../../Assertions.inl\"\n";
 		}
 
 		if constexpr (Settings::CppGenerator::XORStringInclude)
@@ -2665,7 +2665,7 @@ R"({
 	PredefinedElements& UWorldPredefs = PredefinedMembers[ObjectArray::FindClassFast("World").GetIndex()];
 
 	constexpr const char* GetWorldThroughGWorldCode = R"(
-	if constexpr (Offsets::GWorld != 0)
+	if (Offsets::GWorld != 0)
 		return *reinterpret_cast<UWorld**>(InSDKUtils::GetImageBase() + Offsets::GWorld);
 )";
 
@@ -3505,12 +3505,12 @@ using namespace UC;
 */
 namespace Offsets
 {{
-	constexpr int32 GObjects          = 0x{:08X};
-	constexpr int32 AppendString      = 0x{:08X};{}
-	constexpr int32 GNames            = 0x{:08X};
-	constexpr int32 GWorld            = 0x{:08X};
-	constexpr int32 ProcessEvent      = 0x{:08X};
-	constexpr int32 ProcessEventIdx   = 0x{:08X};
+	inline int32 GObjects          = 0x{:08X};
+	inline int32 AppendString      = 0x{:08X};{}
+	inline int32 GNames            = 0x{:08X};
+	inline int32 GWorld            = 0x{:08X};
+	inline int32 ProcessEvent      = 0x{:08X};
+	inline int32 ProcessEventIdx   = 0x{:08X};
 }}
 )", max(Off::InSDK::ObjArray::GObjects, 0x0),
 	max(Off::InSDK::Name::AppendNameToString, 0x0),
