@@ -199,6 +199,19 @@ void ObjectArray::InitDecryption(uint8_t* (*DecryptionFunction)(void* ObjPtr), c
 }
 
 
+bool SafeMatchesAnyLayout(auto&& MatchesAnyLayout, const auto& Layouts, uintptr_t Address)
+{
+	__try
+	{
+		return MatchesAnyLayout(Layouts, Address);
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		std::cout << "Access violation at address 0x" << std::hex << Address << std::dec << ". Skipping...\n";
+		return false; // Skip this address safely if access violation happens
+	}
+};
+
 /* We don't speak about this function... */
 void ObjectArray::Init(bool bScanAllMemory, const char* const ModuleName)
 {
@@ -236,12 +249,12 @@ void ObjectArray::Init(bool bScanAllMemory, const char* const ModuleName)
 	auto IsAddressValidGObjects = [MatchesAnyLayout, &bIsGObjectsChunked](const void* CurrentAddress) -> bool
 	{
 		//std::cerr << "checking addr: " << CurrentAddress << "\n";
-		if (MatchesAnyLayout(FFixedUObjectArrayLayouts, reinterpret_cast<uintptr_t>(CurrentAddress)))
+		if (SafeMatchesAnyLayout(MatchesAnyLayout, FFixedUObjectArrayLayouts, reinterpret_cast<uintptr_t>(CurrentAddress)))
 		{
 			bIsGObjectsChunked = false;
 			return true;
 		}
-		else if (MatchesAnyLayout(FChunkedFixedUObjectArrayLayouts, reinterpret_cast<uintptr_t>(CurrentAddress)))
+		else if (SafeMatchesAnyLayout(MatchesAnyLayout, FChunkedFixedUObjectArrayLayouts, reinterpret_cast<uintptr_t>(CurrentAddress)))
 		{
 			bIsGObjectsChunked = true;
 			return true;
