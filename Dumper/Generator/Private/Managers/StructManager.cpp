@@ -95,6 +95,18 @@ void StructManager::InitAlignmentsAndNames()
 			continue;
 		}
 
+		const std::string Name = ObjAsStruct.GetName();
+
+		if (Name == "DataTableRowHandle_NetCrc32" || Name == "DataTableRowHandle_NetCrc64")
+		{
+			NewOrExistingInfo.Alignment = ObjAsStruct.GetMinAlignment();
+			NewOrExistingInfo.bHasReusedTrailingPadding = false;
+			NewOrExistingInfo.bIsFinal = true;
+			NewOrExistingInfo.Size = ObjAsStruct.GetStructSize();
+
+			continue;
+		}
+
 		const int32 MinAlignment = ObjAsStruct.GetMinAlignment();
 		int32 HighestMemberAlignment = 0x1; // starting at 0x1 when checking **all**, not just struct-properties
 
