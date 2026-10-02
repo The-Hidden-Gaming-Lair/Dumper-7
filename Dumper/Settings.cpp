@@ -189,6 +189,10 @@ void Settings::Config::Load()
 		std::cerr << "Sleep Timeout: " << std::dec << SleepTimeout << "ms" << "\n";
 	}
 
+	bForceGNames = GetPrivateProfileIntA("Settings", "ForceGNames", 0, ConfigPath) != 0;
+	if (bForceGNames)
+		std::cerr << "ForceGNames: decoding names from the FNamePool\n";
+
 	// DumpKey takes VK Scancodes as integers
 	DumpKey = GetPrivateProfileIntA ( "Settings", "DumpKey", 0, ConfigPath);
 

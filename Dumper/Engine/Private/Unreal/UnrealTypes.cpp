@@ -9,6 +9,32 @@
 #include "Architecture.h"
 
 
+/*
+* THGL: call the game's native FName::AppendString under SEH. Some games (The First Descendant)
+* have object slots whose FName decodes to garbage; the native call then reads past the name pool
+* and takes the whole game down. A faulting name becomes "" instead, and is logged (capped).
+*/
+template<typename FnType>
+static bool GuardedAppendString(FnType Fn, const void* Name, FString* Out)
+{
+	__try
+	{
+		Fn(Name, *Out);
+		return true;
+	}
+	__except (1 /* EXCEPTION_EXECUTE_HANDLER */)
+	{
+		return false;
+	}
+}
+
+static void LogBadName(const void* Name)
+{
+	static int NumLogged = 0;
+	if (NumLogged++ < 20)
+		std::cerr << std::format("Dumper-7: FName at {} faulted in AppendString (CompIdx 0x{:X}), using \"\"\n", Name, *static_cast<const uint32*>(Name));
+}
+
 std::string MakeNameValid(std::wstring&& Name)
 {
 	static constexpr const wchar_t* Numbers[10] =
@@ -193,7 +219,12 @@ void FName::Init_Windows(bool bForceGNames)
 	{
 		thread_local FFreableString TempString(1024);
 
-		AppendString(Name, TempString);
+		if (!GuardedAppendString(AppendString, Name, &TempString))
+		{
+			TempString.ResetNum();
+			LogBadName(Name);
+			return std::wstring();
+		}
 
 		std::wstring OutputString = TempString.ToWString();
 		TempString.ResetNum();
@@ -238,7 +269,12 @@ void FName::Init(int32 OverrideOffset, EOffsetOverrideType OverrideType, bool bI
 	{
 		thread_local FFreableString TempString(1024);
 
-		AppendString(Name, TempString);
+		if (!GuardedAppendString(AppendString, Name, &TempString))
+		{
+			TempString.ResetNum();
+			LogBadName(Name);
+			return std::wstring();
+		}
 
 		std::wstring OutputString = TempString.ToWString();
 		TempString.ResetNum();

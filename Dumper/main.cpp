@@ -24,7 +24,12 @@ DWORD MainThread(HMODULE Module)
 	AllocConsole();
 	FILE* Dummy;
 	freopen_s(&Dummy, "CONIN$", "r", stdin);
-	freopen_s(&Dummy, "CONOUT$", "w", stderr);
+	// THGL: log to a file instead of the console - a crash during offset discovery closes the
+	// console with the game, and the log is the only trace of which offsets were found.
+	CreateDirectoryA("C:\\Dumper-7", nullptr);
+	if (freopen_s(&Dummy, "C:\\Dumper-7\\Dumper-7.log", "w", stderr) != 0)
+		freopen_s(&Dummy, "CONOUT$", "w", stderr);
+	setvbuf(stderr, nullptr, _IONBF, 0);
 	std::cerr.clear(); // clear internal error flags on cerr after redirect
 	std::cerr << std::boolalpha << std::hex;
 

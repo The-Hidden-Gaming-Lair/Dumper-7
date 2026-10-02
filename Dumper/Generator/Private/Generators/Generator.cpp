@@ -44,6 +44,13 @@ void Generator::InitEngineCore()
 
 	ObjectArray::Init();
 
+#ifdef PLATFORM_WINDOWS
+	/* THGL: Dumper-7.ini ForceGNames=1 decodes names from the FNamePool instead of calling the game's
+	   AppendString (The First Descendant: the auto-found AppendString yields wrong names + faults). */
+	if (Settings::Config::bForceGNames)
+		FName::Init_Windows(true);
+	else
+#endif
 	CALL_PLATFORM_SPECIFIC_FUNCTION(FName::Init);
 
 	Off::Init();

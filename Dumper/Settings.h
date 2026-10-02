@@ -21,6 +21,7 @@ namespace Settings
 	{
 		inline int SleepTimeout = 0;
 		inline int DumpKey = 0;
+		inline bool bForceGNames = false;
 		inline std::string SDKNamespaceName = "SDK";
 
 		void Load();
