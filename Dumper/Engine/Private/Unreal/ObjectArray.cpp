@@ -139,7 +139,8 @@ bool IsAddressValidGObjects(const uintptr_t Address, const FChunkedFixedUObjectA
 	if (ElementsPerChunk < 0x8000 || ElementsPerChunk > 0x80000)
 		return false;
 
-	const bool bNumChunksFitsNumElements = ((NumElements / ElementsPerChunk) + 1) == NumChunks;
+	/* Some games preallocate chunks beyond the ones in use (Grounded 2 0.6: 146958 elements = 3 chunks needed, NumChunks = 10). */
+	const bool bNumChunksFitsNumElements = ((NumElements / ElementsPerChunk) + 1) <= NumChunks;
 
 	if (!bNumChunksFitsNumElements)
 		return false;
